@@ -2,6 +2,7 @@
 var gl;
 
 var color = vec4(1.0,0.65,0.0,1.0);
+var colorLoc;
 
 var delay = 100;
 var toggleMorph = true;
