@@ -2,6 +2,8 @@
 var gl;
 
 var color = vec4(1.0,0.65,0.0,1.0);
+var colorA = vec4(1.0,0.65,0.0,1.0);
+var colorB = vec4(0.0,0.0,1.0,1.0);
 var colorLoc;
 
 var delay = 100;
@@ -106,7 +108,9 @@ function render()
     gl.uniform1f(tLoc, tParam);
 
 // set the color
+    color = mix(colorA,colorB,tParam);
     gl.uniform4fv(colorLoc,color);
+
     gl.drawArrays( gl.LINE_LOOP, 0, 3);
 
     setTimeout(
