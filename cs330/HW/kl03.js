@@ -72,6 +72,8 @@ function init()
     //from lab 7
     tLoc = gl.getUniformLocation( program, "t" );
 
+    colorLoc = gl.getUniformLocation( program, "inColor" );
+
     // Toggle Button
     var Btn = document.getElementById("toggleBtn");
     Btn.addEventListener("click", toggleMorph);
@@ -103,7 +105,7 @@ function render()
     gl.uniform1f(tLoc, tParam);
 
 // set the color
-
+    gl.uniform4fv(colorLoc,color);
     gl.drawArrays( gl.LINE_LOOP, 0, 3);
 
     setTimeout(
