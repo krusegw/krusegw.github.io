@@ -102,7 +102,7 @@ function render()
         }
     }
 // just hardcoding the t value
-    tParam = 0.0
+    tParam = 1.0
     gl.uniform1f(tLoc, tParam);
 
 // set the color
