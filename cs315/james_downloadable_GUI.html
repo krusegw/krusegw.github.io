@@ -1,0 +1,513 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Singular Vectors</title></head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+  .slidecontainer {
+    width: 1200px;
+
+  }
+
+/* TITLE OF THE FOLDER THAT CONTAINS EVERYTHING */
+
+  .slider {
+    -webkit-appearance: none;
+    width: 600px;
+    height: 25px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+
+  }
+
+  .slider:hover {
+    opacity: 1;
+  }
+
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+  }
+
+  .slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+  }
+
+/* MANY SHORT LABELED INFORMATIONAL AREAS. NOTE WHERE THESE ARE USED LATER */
+
+  .left {
+  float: left;
+  width: 900px;
+  padding: 10px;
+  }
+
+  .right{
+    float:right;
+    width: 1100px;
+    padding: 10px;
+  }
+
+  h2 {
+        color: #000;
+        text-align: center;
+        text-decoration: underline;
+        text-decoration-color: black;
+      }
+
+  h3 {
+        color: #000;
+        text-decoration: underline;
+        text-decoration-color: black;
+      }
+      .tab { margin-left: 20px; }
+      label {
+          display:inline-block;
+          *display: inline;     /* for IE7*/
+          zoom:1;              /* for IE7*/
+          padding-top: 5px;
+          text-align: left;
+          width: 140px;
+      }
+
+      i {
+        color: blue;
+      }
+
+
+      .arrow1 {
+        animation: slide1 1s ease-in-out infinite;
+        margin-left: -20px;
+      }
+
+
+      @keyframes slide1 {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+
+
+        50% {
+          transform: translate(10px, 0);
+        }
+      }
+
+/* THREE DIFFERENT div.absolute AREAS THAT WILL BE REFERRED TO LATER */
+
+      div.absolute
+      {
+        position: absolute;
+        top: 250px;
+        left: 420px;
+        width: 200px;
+        height: 100px;
+      }
+      /* a */
+      div.absolute2
+      {
+        position: absolute;
+        top: 85px;
+        left: 949px;
+        width: 30px;
+        height: 10px;
+
+      }
+      div.absolute3
+      {
+        position: absolute;
+        top: 15px;
+        left: 950px;
+        width: 600px;
+        height: 100px;
+      }
+
+/* TWO MORE ITEMS THAT WILL BE REFERRED TO LATER */
+
+      library
+      {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        overflow: hidden;
+      }
+
+
+      body
+      {
+        padding: 0;
+        margin: 0;
+      }
+
+
+
+/* NOW THINGS BEGIN  */
+/* NOTICE THE USE OF "LEFT" */
+/*  SWITCHING TO A NEW DIV CLASS */
+
+  </style>
+  <body >
+<div class="left" >
+
+
+
+  <h2>SELF-DISCOVERY OF SINGULAR VECTORS AND VALUES</h2>
+  <p class="tab">A 2x2 matrix A maps the unit circle onto an ellipse.  One can reveal this ellipse, point by point, by holding down and moving along<br>
+     the t- slidebar.  For the value of t giving the “greatest stretch” on the ellipse, that is, the point on the ellipse that is farthest from the<br>
+      origin, the corresponding (x,y) is the first right singular vector of A.  The first left singular vector is the normalized (u, v), that is,<br>
+      (u,v) divided by its length.  The first singular value is |(u, v)|, the length of this greatest stretch.
+
+
+<div class="absolute">
+<p style="margin-left:10px">A
+
+
+  <br>
+
+
+
+<i class="fa fa-long-arrow-right arrow1" aria-hidden="true" style="font-size:48px;"></i></div>
+
+
+
+<canvas id="demoCanvas" width="400" height="320" style="margin-left:5px"> canvas</canvas>
+<canvas id="Canvas2" width="400" height="320" style="margin-left:35px;" > canvas</canvas>
+
+  <div class="slidecontainer" style="margin-left:30px">
+      <div class="block">
+
+        <h3> t - SLIDEBAR <input type="range" min="0" max="360" step="1" value="0" class="slider" id="myRange"/><label> &nbsp &nbsp t = <span id="demo"></span>°</label></h3 >
+
+          <p> (t = angle of inclination in the (x,y) coordinate system.  The left coordinate system is (x,y) and the right is (u,v).)
+          <p>NOTE: The second singular vectors are also easily visualized.  They are the unit vectors orthogonal to the first right and first left <br> singular vectors.
+            They can be found using the method of “least stretch”.  The second singular value is the length of “least stretch”.
+      </div>
+
+
+  </div>
+  <script>
+  var k = 0;
+  var slider = document.getElementById("myRange");
+  var output = document.getElementById("demo");
+  output.innerHTML = slider.value;
+  var canvas = document.getElementById('demoCanvas');
+  var ctx = canvas.getContext('2d');
+  var canvas2 = document.getElementById('Canvas2')
+  var ctx2 = canvas2.getContext('2d');
+  var xcen = 200;
+  var ycen = 160;
+  var radius = 100;
+  var startAngle = 0 * Math.PI;
+  var endAngle = 2 * Math.PI;
+  var counterClockwise = false;
+  var u = 0
+  var v = 0
+  var g =0
+
+/*  CANVAS   */
+  ctx.moveTo(xcen,ycen)
+  ctx.strokeStyle = "#000000";
+  ctx.font = "15px Arial";
+  ctx2.font = "15px Arial";
+  ctx.clearRect(0,0,600,600);
+  ctx.fillText("1",xcen+10,45);
+  ctx.fillText("-1",xcen+10,280);
+  ctx.fillText("1",318,ycen+15)
+  ctx.fillText("-1",67,ycen+15)
+  ctx.moveTo(50,ycen)
+  ctx.lineTo(350,ycen)
+  ctx.stroke();
+  ctx.moveTo(xcen,10)
+  ctx.lineTo(xcen,310)
+  ctx.stroke();
+
+  /* CANVAS2 */
+  ctx2.beginPath();
+  ctx2.moveTo(xcen,ycen)
+  ctx2.moveTo(50,ycen)
+  ctx2.lineTo(350,ycen)
+  ctx2.strokeStyle = "#000000";
+  ctx2.stroke();
+  ctx2.moveTo(xcen,10)
+  ctx2.lineTo(xcen,310)
+  ctx2.strokeStyle = "#000000";
+  ctx2.stroke();
+
+
+
+  slider.oninput = function() {
+    x = 200
+    y = 160
+    radius = 100
+
+    output.innerHTML = this.value;
+    k = 1
+    if (k!=0) {
+      var ctx2 = canvas2.getContext('2d');
+      ctx2.beginPath();
+      ctx2.strokeStyle = "white";
+      ctx2.lineWidth = 4;
+      ctx2.moveTo(x,y)
+      ctx2.lineTo(x-(radius/g)*1.4*u,y+(radius/g)*1.4*v)
+      ctx2.stroke();
+    }
+    var ctx2 = canvas2.getContext('2d');
+
+    xcen=200
+    ycen=160
+
+    ctx2.beginPath()
+    ctx2.clearRect(xcen+3,27,40,18)
+    ctx2.clearRect(xcen+3,274,48,18)
+    ctx2.clearRect(325,ycen+2,50,16)
+    ctx2.clearRect(46,ycen+2,48,16)
+
+/* SEE THE MATH DONE IN THE FUNCTION JACOBIAN , LATER */ 
+
+    var arr = calcJacobian()
+    u = arr[0]
+    v = arr[1]
+    g = arr[2]
+
+/* NUMBER OF DIGITS TO DISPLAY ON THE AXES  */
+
+    g=Number(g .toPrecision(2));
+    if(g<10 && g>3){g=Number(g .toPrecision(1))};
+    if(g<1 && g>.3){g=Number(g .toPrecision(1))};
+    if(g<100 && g>30){g=Number(g .toPrecision(1))};
+    if(g<1000 && g>300){g=Number(g .toPrecision(1))};
+    if(g<.1 && g>.03){g=Number(g .toPrecision(1))};
+
+    var xcen = 200
+    var ycen = 160
+
+    /*+g*/
+    ctx2.fillText(g,xcen+10,40);
+    ctx2.fillText(-g,xcen+10,290);
+    ctx2.fillText(g,325,ycen+15);
+    ctx2.fillText(-g,60,ycen+15);
+  
+    ctx2.beginPath();
+    ctx2.strokeStyle = "red";
+    ctx2.moveTo(x,y)
+    ctx2.fillRect(x-(100/g)*1.4*u,y+(100/g)*1.4*v,1.5,1.5)
+    ctx2.moveTo(x-(100/g)*1.4*u,y+(100/g)*1.4*v)
+    ctx2.lineTo(x,y)
+    ctx2.stroke();
+
+    /* X - y graph*/
+    ctx.clearRect(0,0,500,600);
+    ctx.fillText("1",x+10,45);
+    ctx.fillText("-1",x+10,280);
+    ctx.fillText("1",318,ycen+15)
+    ctx.fillText("-1",67,ycen+15)
+    ctx.beginPath();
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth=2;
+    ctx.moveTo(xcen,ycen);
+    ctx.moveTo(xcen,10);
+    ctx.lineTo(xcen,310);
+    ctx.stroke();
+    ctx.moveTo(xcen,ycen);
+    ctx.moveTo(50,ycen);
+    ctx.lineTo(350,ycen);
+    ctx.stroke();
+    ctx.moveTo(xcen,ycen);
+    ctx.beginPath();
+    ctx.strokeStyle = "#000000";
+    ctx.arc(x, y, radius, startAngle, endAngle, counterClockwise);
+    ctx.lineWidth = 2;
+    // line color
+    ctx.stroke();
+    var t = output.innerHTML = this.value;
+    t = t * (Math.PI/180);
+    ctx.moveTo(x,y)
+    ctx.strokeStyle = '#ff0000'
+    ctx.lineTo(x+ radius*Math.cos(t),y- radius*Math.sin(t))
+    ctx.stroke()
+  }
+
+
+
+  function calcJacobian() {
+    var myArr = document.forms.inputField;
+    var myControls = myArr;
+    var slider = document.getElementById("myRange");
+    var angle = document.getElementById("demo1");
+    angle.innerHTML = slider.value + "°"; /* t value*/
+    var x1 = document.getElementById("x")
+    x1.innerHTML = Math.cos(slider.value * (Math.PI/180)).toFixed(3)
+    var y1 = document.getElementById('y')
+    y1.innerHTML = Math.sin(slider.value * (Math.PI/180)).toFixed(3)
+    var a = myControls[0].value;
+    var b = myControls[1].value;
+    var c = myControls[2].value;
+    var d = myControls[3].value;
+
+    var u = a*Math.cos(slider.value * (Math.PI/180)) + b*Math.sin(slider.value * (Math.PI/180)).toFixed(3)
+    var v = c*Math.cos(slider.value * (Math.PI/180)) + d*Math.sin(slider.value * (Math.PI/180)).toFixed(3)
+    var rad2 = Math.sqrt(Math.pow(u,2)+Math.pow(v,2)).toFixed(3)
+    var U = document.getElementById('u')
+    U.innerHTML = u.toFixed(3)
+    var V = document.getElementById('v')
+    V.innerHTML = v.toFixed(3)
+    var len1 = document.getElementById('len1')
+    len1.innerHTML = Math.sqrt(Math.pow(u,2)+Math.pow(v,2)).toFixed(3)
+    var norm_u = document.getElementById('normU')
+    norm_u.innerHTML = (u/Math.sqrt(Math.pow(u,2)+Math.pow(v,2))).toFixed(3)
+    var norm_v = document.getElementById('normV')
+    norm_v.innerHTML = (v/Math.sqrt(Math.pow(u,2)+Math.pow(v,2))).toFixed(3)
+    var intialU = 0
+    var intialV = 0
+    var intialL = 0
+    var temp = 0
+    var highT = 0;
+    for (var i = 0; i <= 360; i = i+1) {
+      intialU = a*Math.cos(i * (Math.PI/180)) + b*Math.sin(i* (Math.PI/180))
+      intialV = c*Math.cos(i * (Math.PI/180)) + d*Math.sin(i * (Math.PI/180))
+      intialL = Math.sqrt(Math.pow(intialU,2)+Math.pow(intialV,2))
+      if (temp < intialL) {
+        temp = intialL;
+        highT = i;
+
+      }
+      else {
+        temp = temp
+      }
+    }
+
+
+
+    /* user defined greatest stretch*/
+
+    var uMax = a*Math.cos(slider.value * (Math.PI/180)) + b*Math.sin(slider.value * (Math.PI/180)).toFixed(3)
+    var vMax = c*Math.cos(slider.value * (Math.PI/180)) + d*Math.sin(slider.value * (Math.PI/180)).toFixed(3)
+    var g = 1.05 * Math.max(Math.sqrt(Math.pow(a,2) + Math.pow(c,2)), Math.sqrt(Math.pow(b,2) + Math.pow(d,2)), Math.sqrt(Math.pow(a,2) + Math.pow(b,2)), Math.sqrt(Math.pow(c,2) + Math.pow(d,2)))
+    var singleValue = Math.sqrt(Math.pow(uMax,2)+Math.pow(vMax,2)).toFixed(3)
+    var T = document.getElementById('HighT')
+    T.innerHTML = slider.value + "°"
+    var LSVx = document.getElementById('LSVx')
+    LSVx.innerHTML = Math.cos(slider.value * (Math.PI/180)).toFixed(3)
+    var LSVy = document.getElementById('LSVy')
+    LSVy.innerHTML = Math.sin(slider.value * (Math.PI/180)).toFixed(3)
+    var temp1 = 0
+    temp1 = uMax/Math.sqrt(Math.pow(uMax,2)+Math.pow(vMax,2)).toFixed(3)
+    var temp2 = vMax/Math.sqrt(Math.pow(uMax,2)+Math.pow(vMax,2)).toFixed(3)
+    var maxNorm_u = document.getElementById('maxNormU')
+    maxNorm_u.innerHTML = temp1.toFixed(3)
+    var maxNorm_v = document.getElementById('maxNormV')
+    maxNorm_v.innerHTML = temp2.toFixed(3)
+    var SV = document.getElementById('sv')
+    SV.innerHTML = Math.sqrt(Math.pow(uMax,2)+Math.pow(vMax,2)).toFixed(3)
+
+
+/* The ultimate max */
+
+    var uMax1 = a*Math.cos(highT * (Math.PI/180)) + b*Math.sin(highT * (Math.PI/180)).toFixed(3)
+    var vMax1 = c*Math.cos(highT * (Math.PI/180)) + d*Math.sin(highT * (Math.PI/180)).toFixed(3)
+    var singleValue1 = Math.sqrt(Math.pow(uMax1,2)+Math.pow(vMax1,2)).toFixed(3)
+
+    var con
+    var dif = (Math.abs(singleValue - singleValue1))/singleValue1
+
+/* con 1 = show
+   con 0 = hidden
+   */
+
+
+   var alert = document.getElementById('alert')
+   alert.innerHTML = con
+    if (dif>0.02) {
+      con = "Alert: you did not find the greatest stretch"
+      alert.innerHTML = con
+    }
+    else {
+      con = ""
+      alert.innerHTML = con
+    }
+
+    return [u,v,g,con];
+}
+
+
+
+
+function showDiv() {
+
+  var x = document.getElementById("welcomeDiv");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+
+}
+
+
+function refresh()
+{
+  location.reload();
+}
+  </script>
+</div>
+<div class="absolute2">
+  A =
+</div>
+  <div class="absolute3" >
+    <div class="well well-lg">
+      <h3>Step 1. Enter matrix values</h3>
+      <form id="inputField" role="form" style="margin-left:30px">
+
+        <input type="text" name="field00" size="5" >
+        <input type="text" name="field01" size="5">
+        <br>
+        <input type="text" name="field10" size="5" >
+        <input type="text" name="field11" size="5" >
+  <input type="button" onclick="calcJacobian()" value="calculate" name="calculate" class="btn btn-info" style="margin-left:30px;" >
+      </form>
+
+        <br>
+        <img src="https://i.ibb.co/cxGjpxT/note.png">
+        <h3>Step 2.</h3>
+        <p> Hold down and slide along the slidebar.</p>
+
+        <h3>Step 3. Results:</h3>
+        <p class="tab">t = <span id="demo1"></span> </p>
+        <p class="tab"> vector (x,y) = (<span id = 'x'></span> , <span id='y'></span>)</p>
+        <p class="tab"> vector (u,v) = (<span id = 'u'></span> , <span id='v'></span>)</p>
+
+        <p class="tab"> length of (u,v) = |(u,v)| = <span id="len1"></span></p>
+        <p class="tab"> normalized (u,v) = (<span id = 'normU'></span> , <span id='normV'></span>)</p>
+
+        <h3>Step 4. Exploration:</h3>
+        <p>Slide until the length of (u,v) given above</p>
+        <p> is maximized. Then click <input type="button" name="answer"  value="Done" onclick="showDiv()" /></p>
+        <div id="welcomeDiv"  style="display:none;" class="answer_list" >
+          <p class="tab"> Value of t that gives the greatest stretch = <span id="HighT"></span></p>
+          <p class="tab" style="color:red;"> <span id="alert"></span></p>
+          <p class="tab"> Right Sing vec [ = the (x,y) for that t ] = (<span id = 'LSVx'></span> , <span id='LSVy'></span>)</p>
+          <p class="tab"> Left Sing vec [ = normalized (u,v) for that t ] = (<span id = 'maxNormU'></span> , <span id='maxNormV'></span>)</p>
+          <p class="tab"> Singular Value [ = the greatest stretch ] = <span id="sv"></span></p>
+          <p class="tab"> <span id="test"></span></p>
+            <p class="tab"> <span id="test1"></span></p>
+
+        </div>
+      <h3>Step 5. New Matrix
+      <input type="button" name = "refresh" value="Refresh" class="tab" onclick="refresh()"/></h3>
+    </div>
+  </div>
+
+
+</body>
+</html>
